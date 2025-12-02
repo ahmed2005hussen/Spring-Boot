@@ -1,0 +1,13 @@
+package com.example.demo;
+
+import org.springframework.stereotype.Component;
+
+
+public class FootBallCoach implements Coach {
+
+    @Override
+    public String getDailyWorkout() {
+        return "I'm Playing football fff";
+    }
+
+}
