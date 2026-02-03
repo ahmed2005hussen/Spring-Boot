@@ -3,15 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Thymeleaf Demo</title>
+    <link rel="stylesheet" th:href="@{/css/demo.css}">
 </head>
 <body>
-
-    hello, world of spring boot!
-
-<br><br>
-
-Student name: <span th:text="${param.studentName}"></span>
-
-
+    <p th:text="'Time on the server is: ' + ${theDate}" class="funny" ></p>
 </body>
 </html>
