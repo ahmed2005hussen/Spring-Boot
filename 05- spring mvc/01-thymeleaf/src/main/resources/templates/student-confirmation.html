@@ -6,7 +6,19 @@
 </head>
 <body>
 
-The Student confirmation is:  <span th:text="${student.firstName} + ' ' + ${student.lastName}"></span>.
+The Student confirmation is:  <span th:text="${student.firstName} + ' ' + ${student.lastName} + ' ' + ${student.country}"></span>.
+<br><br>
 
+Country :  <span th:text=  "${student.country}"></span>.
+
+<br><br>
+
+Favorite Language :  <span th:text=  "${student.favoriteLanguage}"></span>.
+
+Favorite System :
+
+<ul>
+  <li th:each="favorite : ${student.favoriteSystem}" th:text="${favorite}"></li>
+</ul>
 </body>
 </html>

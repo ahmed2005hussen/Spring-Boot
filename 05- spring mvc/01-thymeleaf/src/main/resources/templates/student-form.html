@@ -11,6 +11,25 @@
     <input type="text" th:field="*{lastName}" placeholder="Last Name">
 
     <br><br>
+
+    <select th:field="*{country}">
+
+        <option th:each="item : ${countries}" th:value="${item}" th:text="${item}"></option>
+
+    </select>
+    <br><br>
+
+
+    <input type="radio" th:field="*{favoriteLanguage}" th:each="item: ${languages}"
+                                                            th:value="${item}"
+                                                            th:text="${item}"></input>
+
+    <br><br>
+
+    <input type="checkbox" th:field="*{favoriteSystem}" th:each="item: ${systems}"  th:value="${item}" th:text="${item}"></input>
+
+    <br><br>
+
     <input type="submit" value="Submit">
 
 
