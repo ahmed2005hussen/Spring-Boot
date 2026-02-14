@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leadership Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #e8c97a;
+            --gold-dim: rgba(201,168,76,0.12);
+            --bg-deep: #080b12;
+            --bg-card: rgba(12,16,26,0.9);
+            --bg-nav: rgba(8,11,18,0.92);
+            --text-primary: #f0ead6;
+            --text-muted: #8a8070;
+            --border: rgba(201,168,76,0.2);
+            --accent: #5b8cff;
+            --accent-dim: rgba(91,140,255,0.1);
+        }
+
+        html, body { min-height: 100vh; }
+
+        body {
+            background: var(--bg-deep);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .bg-glow {
+            position: fixed; border-radius: 50%;
+            filter: blur(100px); pointer-events: none; z-index: 0;
+        }
+        .bg-glow-1 {
+            width: 700px; height: 700px;
+            background: radial-gradient(circle, rgba(91,140,255,0.07) 0%, transparent 70%);
+            top: -200px; right: -200px;
+            animation: driftA 16s ease-in-out infinite alternate;
+        }
+        .bg-glow-2 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%);
+            bottom: -100px; left: -100px;
+            animation: driftB 20s ease-in-out infinite alternate;
+        }
+        .grid-overlay {
+            position: fixed; inset: 0;
+            background-image:
+                    linear-gradient(rgba(91,140,255,0.02) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(91,140,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0; pointer-events: none;
+        }
+        @keyframes driftA { to { transform: translate(-60px, 80px); } }
+        @keyframes driftB { to { transform: translate(60px, -60px); } }
+
+        /* ── Navbar ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: var(--bg-nav);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 40px;
+            height: 68px;
+            display: flex; align-items: center; justify-content: space-between;
+            animation: navSlide 0.8s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes navSlide {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        nav::after {
+            content: '';
+            position: absolute; bottom: 0; left: 10%; right: 10%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(91,140,255,0.5), transparent);
+        }
+
+        .nav-brand {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .nav-logo {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: rgba(91,140,255,0.1);
+            border: 1px solid rgba(91,140,255,0.25);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .nav-logo svg {
+            width: 18px; height: 18px;
+            stroke: #88aaff; fill: none;
+            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .nav-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px; font-weight: 700;
+            color: var(--text-primary);
+        }
+        .nav-title span { color: #88aaff; }
+
+        .nav-breadcrumb {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; color: var(--text-muted);
+        }
+        .nav-breadcrumb a {
+            color: var(--text-muted); text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-breadcrumb a:hover { color: var(--text-primary); }
+        .nav-breadcrumb .sep {
+            font-size: 10px; opacity: 0.4;
+        }
+        .nav-breadcrumb .current {
+            color: #88aaff; font-weight: 500;
+        }
+
+        .nav-right {
+            display: flex; align-items: center; gap: 16px;
+        }
+
+        .manager-badge {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 14px;
+            background: rgba(91,140,255,0.1);
+            border: 1px solid rgba(91,140,255,0.25);
+            border-radius: 999px; font-size: 13px;
+        }
+        .manager-badge .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #88aaff;
+            box-shadow: 0 0 6px #88aaff;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.5; transform: scale(0.8); }
+        }
+        .manager-badge span { color: #88aaff; font-weight: 500; }
+
+        .back-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 10px; text-decoration: none;
+            color: var(--text-muted); font-family: 'DM Sans', sans-serif;
+            font-size: 13px; transition: all 0.2s;
+        }
+        .back-btn svg {
+            width: 14px; height: 14px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .back-btn:hover {
+            color: var(--text-primary);
+            border-color: rgba(201,168,76,0.4);
+            background: var(--gold-dim);
+        }
+
+        .logout-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 18px;
+            background: transparent;
+            border: 1px solid rgba(255,100,80,0.3);
+            border-radius: 10px;
+            color: #e08070; font-family: 'DM Sans', sans-serif;
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            transition: all 0.25s;
+        }
+        .logout-btn svg {
+            width: 14px; height: 14px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .logout-btn:hover {
+            background: rgba(224,128,112,0.1);
+            border-color: rgba(255,100,80,0.6);
+            color: #ff8070; transform: translateY(-1px);
+        }
+
+        /* ── Main ── */
+        main {
+            position: relative; z-index: 10;
+            padding: 110px 40px 60px;
+            max-width: 1100px; margin: 0 auto;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page header */
+        .page-header {
+            display: flex; align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 48px;
+            animation: fadeUp 0.9s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .page-header-left .tag {
+            font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase;
+            color: #88aaff; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .tag::before {
+            content: ''; display: block;
+            width: 20px; height: 1px; background: #88aaff;
+        }
+        .page-header-left h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 40px; font-weight: 700; line-height: 1.1;
+        }
+        .page-header-left p {
+            margin-top: 10px; color: var(--text-muted);
+            font-size: 15px; line-height: 1.6; max-width: 500px;
+        }
+        .greeting-box {
+            background: rgba(91,140,255,0.08);
+            border: 1px solid rgba(91,140,255,0.2);
+            border-radius: 14px; padding: 16px 22px;
+            text-align: center;
+        }
+        .greeting-box .g-label {
+            font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+            color: rgba(136,170,255,0.7); margin-bottom: 6px;
+        }
+        .greeting-box .g-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px; color: #88aaff;
+        }
+
+        /* Meetings grid */
+        .meetings-header {
+            font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 16px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .meetings-header::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+
+        .meetings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px; margin-bottom: 32px;
+        }
+
+        .meeting-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px; padding: 24px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both;
+            cursor: pointer;
+        }
+        .meeting-card:nth-child(1) { animation-delay: 0.35s; }
+        .meeting-card:nth-child(2) { animation-delay: 0.45s; }
+        .meeting-card:nth-child(3) { animation-delay: 0.55s; }
+        .meeting-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(91,140,255,0.12);
+            border-color: rgba(91,140,255,0.3);
+        }
+
+        .mc-time {
+            font-size: 11px; letter-spacing: 0.8px; color: #88aaff;
+            margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+        }
+        .mc-time svg {
+            width: 12px; height: 12px; stroke: #88aaff; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .mc-title {
+            font-size: 16px; font-weight: 600;
+            color: var(--text-primary); margin-bottom: 8px;
+        }
+        .mc-desc {
+            font-size: 13px; color: var(--text-muted); line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .mc-footer {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .mc-attendees {
+            display: flex;
+        }
+        .mc-att-avatar {
+            width: 24px; height: 24px; border-radius: 50%;
+            border: 2px solid var(--bg-deep);
+            background: linear-gradient(135deg, var(--gold), #8873a0);
+            margin-left: -6px; font-size: 10px; font-weight: 700;
+            color: #0a0700;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .mc-att-avatar:first-child { margin-left: 0; }
+        .mc-count {
+            font-size: 11px; color: var(--text-muted);
+        }
+        .mc-status {
+            font-size: 11px; font-weight: 600; padding: 3px 10px;
+            border-radius: 999px; letter-spacing: 0.5px;
+        }
+        .status-upcoming {
+            background: rgba(91,140,255,0.12); color: #88aaff;
+            border: 1px solid rgba(91,140,255,0.25);
+        }
+        .status-live {
+            background: rgba(76,175,125,0.12); color: #4caf7d;
+            border: 1px solid rgba(76,175,125,0.25);
+        }
+        .status-done {
+            background: rgba(138,128,112,0.12); color: var(--text-muted);
+            border: 1px solid rgba(138,128,112,0.2);
+        }
+
+        /* Team stats bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            animation: fadeUp 0.9s 0.65s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .stat-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .stat-box .sv {
+            font-family: 'Playfair Display', serif;
+            font-size: 30px; font-weight: 700;
+            color: var(--text-primary);
+        }
+        .stat-box .sv.blue { color: #88aaff; }
+        .stat-box .sl {
+            font-size: 12px; color: var(--text-muted);
+            margin-top: 4px; letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div class="grid-overlay"></div>
+
+<!-- ── Navbar ── -->
+<nav>
+    <div class="nav-brand">
+        <div class="nav-logo">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+            <div class="nav-title">Nexus<span>HQ</span></div>
+            <div class="nav-breadcrumb" style="margin-top:2px">
+                <a th:href="@{/}">Home</a>
+                <span class="sep">▶</span>
+                <span class="current">Leadership Hub</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <div class="manager-badge">
+            <div class="dot"></div>
+            <span sec:authentication="name">Manager</span>
+        </div>
+        <a th:href="@{/}" class="back-btn">
+            <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Back
+        </a>
+        <form th:action="@{/logout}" method="post" style="margin:0">
+            <button type="submit" class="logout-btn">
+                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sign Out
+            </button>
+        </form>
+    </div>
+</nav>
+
+<!-- ── Main ── -->
+<main>
+    <div class="page-header">
+        <div class="page-header-left">
+            <div class="tag">Management Zone</div>
+            <h1>Leadership Hub</h1>
+            <p>Manage your team, coordinate meetings, and drive strategic decisions. Your command center for executive operations.</p>
+        </div>
+        <div class="greeting-box">
+            <div class="g-label">Welcome back, Manager</div>
+            <div class="g-name" sec:authentication="name">Manager Name</div>
+        </div>
+    </div>
+
+    <!-- Meetings -->
+    <div class="meetings-header">Upcoming Meetings</div>
+    <div class="meetings-grid">
+
+        <div class="meeting-card">
+            <div class="mc-time">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Today · 10:00 AM
+            </div>
+            <div class="mc-title">Q1 Strategy Review</div>
+            <div class="mc-desc">Quarterly performance analysis and goal alignment for the leadership team.</div>
+            <div class="mc-footer">
+                <div class="mc-attendees">
+                    <div class="mc-att-avatar">A</div>
+                    <div class="mc-att-avatar">B</div>
+                    <div class="mc-att-avatar">C</div>
+                    <div class="mc-att-avatar" style="background:rgba(91,140,255,0.3);color:#88aaff;font-size:9px">+5</div>
+                </div>
+                <span class="mc-status status-live">● Live</span>
+            </div>
+        </div>
+
+        <div class="meeting-card">
+            <div class="mc-time">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Today · 2:30 PM
+            </div>
+            <div class="mc-title">Team Sync — Engineering</div>
+            <div class="mc-desc">Weekly sync with engineering leads to track sprint progress and blockers.</div>
+            <div class="mc-footer">
+                <div class="mc-attendees">
+                    <div class="mc-att-avatar">D</div>
+                    <div class="mc-att-avatar">E</div>
+                    <div class="mc-att-avatar" style="background:rgba(201,168,76,0.3);color:#c9a84c;font-size:9px">+3</div>
+                </div>
+                <span class="mc-status status-upcoming">Upcoming</span>
+            </div>
+        </div>
+
+        <div class="meeting-card">
+            <div class="mc-time">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Tomorrow · 9:00 AM
+            </div>
+            <div class="mc-title">Budget Planning Session</div>
+            <div class="mc-desc">Annual budget review and resource allocation for next fiscal quarter.</div>
+            <div class="mc-footer">
+                <div class="mc-attendees">
+                    <div class="mc-att-avatar">F</div>
+                    <div class="mc-att-avatar">G</div>
+                </div>
+                <span class="mc-status status-upcoming">Upcoming</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-box">
+            <div class="sv blue">12</div>
+            <div class="sl">Team Members</div>
+        </div>
+        <div class="stat-box">
+            <div class="sv blue">3</div>
+            <div class="sl">Meetings Today</div>
+        </div>
+        <div class="stat-box">
+            <div class="sv blue">94%</div>
+            <div class="sl">Attendance Rate</div>
+        </div>
+        <div class="stat-box">
+            <div class="sv blue">8</div>
+            <div class="sl">Open Action Items</div>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

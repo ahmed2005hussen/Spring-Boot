@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #e8c97a;
+            --gold-dim: rgba(201,168,76,0.12);
+            --bg-deep: #080b12;
+            --bg-card: rgba(12,16,26,0.9);
+            --bg-nav: rgba(8,11,18,0.92);
+            --text-primary: #f0ead6;
+            --text-muted: #8a8070;
+            --border: rgba(201,168,76,0.2);
+            --manager: #5b8cff;
+            --admin: #c96c4c;
+            --manager-dim: rgba(91,140,255,0.1);
+            --admin-dim: rgba(201,108,76,0.1);
+        }
+
+        html, body { min-height: 100vh; }
+
+        body {
+            background: var(--bg-deep);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* ── BG Effects ── */
+        .bg-glow {
+            position: fixed; border-radius: 50%;
+            filter: blur(100px); pointer-events: none; z-index: 0;
+        }
+        .bg-glow-1 {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+            top: -150px; left: -150px;
+            animation: driftA 14s ease-in-out infinite alternate;
+        }
+        .bg-glow-2 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(91,140,255,0.05) 0%, transparent 70%);
+            bottom: -100px; right: -100px;
+            animation: driftB 18s ease-in-out infinite alternate;
+        }
+        .grid-overlay {
+            position: fixed; inset: 0;
+            background-image:
+                    linear-gradient(rgba(201,168,76,0.025) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(201,168,76,0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0; pointer-events: none;
+        }
+        @keyframes driftA { to { transform: translate(80px, 100px); } }
+        @keyframes driftB { to { transform: translate(-60px, -80px); } }
+
+        /* ── Navbar ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: var(--bg-nav);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 40px;
+            height: 68px;
+            display: flex; align-items: center; justify-content: space-between;
+            animation: navSlide 0.8s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes navSlide {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        nav::after {
+            content: '';
+            position: absolute; bottom: 0; left: 10%; right: 10%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent);
+        }
+
+        .nav-brand {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .nav-logo {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: var(--gold-dim);
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .nav-logo svg {
+            width: 18px; height: 18px;
+            stroke: var(--gold); fill: none;
+            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .nav-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px; font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.3px;
+        }
+        .nav-title span { color: var(--gold); }
+
+        .nav-right {
+            display: flex; align-items: center; gap: 20px;
+        }
+
+        .user-chip {
+            display: flex; align-items: center; gap: 10px;
+            padding: 6px 14px;
+            background: var(--gold-dim);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font-size: 13px;
+        }
+        .user-chip .avatar {
+            width: 26px; height: 26px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), #a8873a);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: #0a0700;
+        }
+        .user-chip .uname { color: var(--text-primary); font-weight: 500; }
+        .user-chip .urole {
+            color: var(--gold);
+            font-size: 11px;
+            background: rgba(201,168,76,0.12);
+            padding: 2px 8px; border-radius: 999px;
+            border: 1px solid rgba(201,168,76,0.25);
+        }
+
+        /* Logout button */
+        .logout-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 18px;
+            background: transparent;
+            border: 1px solid rgba(255,100,80,0.3);
+            border-radius: 10px;
+            color: #e08070; font-family: 'DM Sans', sans-serif;
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            transition: all 0.25s; letter-spacing: 0.3px;
+        }
+        .logout-btn svg {
+            width: 14px; height: 14px;
+            stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .logout-btn:hover {
+            background: rgba(224,128,112,0.1);
+            border-color: rgba(255,100,80,0.6);
+            color: #ff8070;
+            transform: translateY(-1px);
+        }
+
+        /* ── Main Content ── */
+        main {
+            position: relative; z-index: 10;
+            padding: 110px 40px 60px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Welcome header */
+        .welcome-header {
+            margin-bottom: 48px;
+            animation: fadeUp 0.9s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .welcome-header .greeting {
+            font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--gold); margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .greeting::before {
+            content: ''; display: block;
+            width: 24px; height: 1px;
+            background: var(--gold);
+        }
+        .welcome-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px; font-weight: 700;
+            line-height: 1.1;
+        }
+        .welcome-header h1 span { color: var(--gold); }
+        .welcome-header p {
+            margin-top: 12px;
+            color: var(--text-muted); font-size: 15px; line-height: 1.6;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Info Card ── */
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            position: relative; overflow: hidden;
+            animation: fadeUp 0.9s 0.35s cubic-bezier(0.16,1,0.3,1) both;
+            backdrop-filter: blur(10px);
+        }
+        .info-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        .info-card-title {
+            font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .info-card-title svg {
+            width: 14px; height: 14px;
+            stroke: var(--gold); fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        .info-row {
+            display: flex; align-items: center; gap: 16px;
+        }
+        .info-item {
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .info-item label {
+            font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .info-item .value {
+            font-size: 16px; font-weight: 500; color: var(--text-primary);
+        }
+        .info-divider {
+            width: 1px; height: 40px;
+            background: var(--border); flex-shrink: 0;
+        }
+
+        .role-badges {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
+        }
+        .role-badge {
+            font-size: 11px; font-weight: 600;
+            padding: 4px 12px; border-radius: 999px;
+            letter-spacing: 0.6px; text-transform: uppercase;
+        }
+        .role-badge.employee {
+            background: rgba(201,168,76,0.12); color: var(--gold);
+            border: 1px solid rgba(201,168,76,0.3);
+        }
+        .role-badge.manager {
+            background: rgba(91,140,255,0.12); color: #88aaff;
+            border: 1px solid rgba(91,140,255,0.3);
+        }
+        .role-badge.admin {
+            background: rgba(201,108,76,0.12); color: #ff9a7a;
+            border: 1px solid rgba(201,108,76,0.3);
+        }
+
+        /* ── Section Cards (role-based) ── */
+        .sections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .section-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            position: relative; overflow: hidden;
+            text-decoration: none;
+            display: block;
+            transition: transform 0.3s, box-shadow 0.3s;
+            backdrop-filter: blur(10px);
+            animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .section-card:nth-child(1) { animation-delay: 0.45s; }
+        .section-card:nth-child(2) { animation-delay: 0.55s; }
+
+        .section-card.manager-card {
+            border: 1px solid rgba(91,140,255,0.25);
+        }
+        .section-card.admin-card {
+            border: 1px solid rgba(201,108,76,0.25);
+        }
+        .section-card.manager-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(91,140,255,0.6), transparent);
+        }
+        .section-card.admin-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(201,108,76,0.6), transparent);
+        }
+        .section-card:hover {
+            transform: translateY(-4px);
+        }
+        .section-card.manager-card:hover {
+            box-shadow: 0 12px 40px rgba(91,140,255,0.15);
+        }
+        .section-card.admin-card:hover {
+            box-shadow: 0 12px 40px rgba(201,108,76,0.15);
+        }
+
+        .sc-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 18px;
+        }
+        .manager-card .sc-icon { background: var(--manager-dim); }
+        .admin-card .sc-icon   { background: var(--admin-dim); }
+        .sc-icon svg {
+            width: 22px; height: 22px; fill: none;
+            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .manager-card .sc-icon svg { stroke: #88aaff; }
+        .admin-card   .sc-icon svg { stroke: #ff9a7a; }
+
+        .sc-badge {
+            display: inline-flex; align-items: center;
+            font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+            text-transform: uppercase; padding: 3px 10px; border-radius: 999px;
+            margin-bottom: 12px;
+        }
+        .manager-card .sc-badge {
+            background: var(--manager-dim); color: #88aaff;
+            border: 1px solid rgba(91,140,255,0.3);
+        }
+        .admin-card .sc-badge {
+            background: var(--admin-dim); color: #ff9a7a;
+            border: 1px solid rgba(201,108,76,0.3);
+        }
+
+        .sc-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px; font-weight: 700;
+            color: var(--text-primary); margin-bottom: 8px;
+        }
+        .sc-desc {
+            font-size: 13px; color: var(--text-muted);
+            line-height: 1.6; margin-bottom: 20px;
+        }
+        .sc-link {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: gap 0.2s;
+        }
+        .manager-card .sc-link { color: #88aaff; }
+        .admin-card   .sc-link { color: #ff9a7a; }
+        .sc-link svg {
+            width: 14px; height: 14px; stroke: currentColor;
+            fill: none; stroke-width: 2.5;
+            stroke-linecap: round; stroke-linejoin: round;
+        }
+        .section-card:hover .sc-link { gap: 10px; }
+
+        /* ── Quick Stats ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            animation: fadeUp 0.9s 0.6s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px 24px;
+            backdrop-filter: blur(10px);
+        }
+        .stat-label {
+            font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 8px;
+        }
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px; font-weight: 700; color: var(--text-primary);
+        }
+        .stat-sub {
+            font-size: 12px; color: var(--text-muted); margin-top: 4px;
+        }
+        .stat-dot {
+            display: inline-block; width: 6px; height: 6px;
+            border-radius: 50%; margin-right: 5px;
+        }
+        .dot-green { background: #4caf7d; box-shadow: 0 0 6px #4caf7d; }
+    </style>
+</head>
+<body>
+
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div class="grid-overlay"></div>
+
+<!-- ── Navbar ── -->
+<nav>
+    <div class="nav-brand">
+        <div class="nav-logo">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="nav-title">Nexus<span>HQ</span></span>
+    </div>
+
+    <div class="nav-right">
+        <div class="user-chip">
+            <div class="avatar">
+                <span sec:authentication="principal.username" id="avatarInit">U</span>
+            </div>
+            <span class="uname" sec:authentication="principal.username">Username</span>
+            <span class="urole" sec:authentication="principal.authorities">ROLE</span>
+        </div>
+
+        <form th:action="@{/logout}" method="post" style="margin:0">
+            <button type="submit" class="logout-btn">
+                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sign Out
+            </button>
+        </form>
+    </div>
+</nav>
+
+<!-- ── Main ── -->
+<main>
+    <div class="welcome-header">
+        <div class="greeting">Dashboard Overview</div>
+        <h1>Welcome back, <span sec:authentication="principal.username">User</span></h1>
+        <p>Here's what's happening in your workspace today. You have full access to your role-based modules below.</p>
+    </div>
+
+    <!-- User Info Card -->
+    <div class="info-card">
+        <div class="info-card-title">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Account Information
+        </div>
+        <div class="info-row">
+            <div class="info-item">
+                <label>Signed in as</label>
+                <div class="value" sec:authentication="principal.username">username</div>
+            </div>
+            <div class="info-divider"></div>
+            <div class="info-item">
+                <label>Permissions</label>
+                <div class="role-badges">
+                    <span class="role-badge employee" sec:authentication="principal.authorities">ROLES</span>
+                </div>
+            </div>
+            <div class="info-divider"></div>
+            <div class="info-item">
+                <label>Status</label>
+                <div class="value">
+                    <span class="stat-dot dot-green"></span>Active Session
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role-based sections -->
+    <div class="sections-grid">
+
+        <div sec:authorize="hasRole('MANAGER')">
+            <a th:href="@{/leaders}" class="section-card manager-card">
+                <div class="sc-icon">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <span class="sc-badge">Managers Only</span>
+                <div class="sc-title">Leadership Hub</div>
+                <div class="sc-desc">Access executive meetings, strategic planning sessions, team performance reviews, and leadership resources.</div>
+                <div class="sc-link">
+                    Enter Leadership Portal
+                    <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </div>
+            </a>
+        </div>
+
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/systems}" class="section-card admin-card">
+                <div class="sc-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                </div>
+                <span class="sc-badge">Admins Only</span>
+                <div class="sc-title">System Control</div>
+                <div class="sc-desc">Manage system configurations, user permissions, security settings, and platform-wide administrative controls.</div>
+                <div class="sc-link">
+                    Enter Admin Panel
+                    <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Session Started</div>
+            <div class="stat-value" id="sessionTime">—</div>
+            <div class="stat-sub">Today's login time</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">System Status</div>
+            <div class="stat-value"><span class="stat-dot dot-green"></span>Online</div>
+            <div class="stat-sub">All services operational</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Access Level</div>
+            <div class="stat-value" id="accessLevelDisplay">—</div>
+            <div class="stat-sub" sec:authentication="principal.authorities">Current permissions</div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Session time
+    const now = new Date();
+    document.getElementById('sessionTime').textContent =
+        now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+    // Avatar initials from username
+    const avatarEl = document.getElementById('avatarInit');
+    if (avatarEl) {
+        const text = avatarEl.textContent.trim();
+        avatarEl.textContent = text.charAt(0).toUpperCase();
+    }
+
+    // Hover glow on section cards
+    document.querySelectorAll('.section-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            card.style.setProperty('--mx', x + '%');
+            card.style.setProperty('--my', y + '%');
+        });
+    });
+</script>
+</body>
+</html>
