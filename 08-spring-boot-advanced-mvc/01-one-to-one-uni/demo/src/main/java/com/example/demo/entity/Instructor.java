@@ -15,7 +15,7 @@ public class Instructor {
     @Column(name = "first_name")
     private String firstName;
 
-    @Column(name = "lastt_name")
+    @Column(name = "last_name")
     private String lastName;
 
 
@@ -30,7 +30,7 @@ public class Instructor {
     public Instructor() {
     }
 
-    public Instructor(String email, String lastName, String firstName) {
+    public Instructor( String firstName ,  String lastName,String email) {
         this.email = email;
         this.lastName = lastName;
         this.firstName = firstName;

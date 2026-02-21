@@ -15,12 +15,15 @@ public class InstructorDetail {
     @Column(name = "youtube_channel")
     private String youtubeChannel;
 
-
     @Column(name = "hobby")
     private String hobby;
 
-    public InstructorDetail() {
-    }
+
+    @OneToOne(mappedBy = "instructorDetail",cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH} )
+    private Instructor instructor;
+
+
+    public InstructorDetail() {}
 
     public InstructorDetail(String youtubeChannel, String hobby) {
         this.youtubeChannel = youtubeChannel;
@@ -51,12 +54,20 @@ public class InstructorDetail {
         this.youtubeChannel = youtubeChannel;
     }
 
+    public Instructor getInstructor() {
+        return instructor;
+    }
+
+    public void setInstructor(Instructor instructor) {
+        this.instructor = instructor;
+    }
+
     @Override
     public String toString() {
         return "InstructorDetail{" +
                 "id=" + id +
                 ", youtubeChannel='" + youtubeChannel + '\'' +
-                ", hobby='" + hobby + '\'' +
-                '}';
+                ", hobby='" + hobby + '\''
+                ;
     }
 }
