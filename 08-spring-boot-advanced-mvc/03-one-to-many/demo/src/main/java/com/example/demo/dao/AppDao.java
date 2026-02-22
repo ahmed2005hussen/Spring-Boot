@@ -1,7 +1,10 @@
 package com.example.demo.dao;
 
+import com.example.demo.entity.Course;
 import com.example.demo.entity.Instructor;
 import com.example.demo.entity.InstructorDetail;
+
+import java.util.List;
 
 public interface AppDao {
 
@@ -14,5 +17,15 @@ public interface AppDao {
     void deleteInstructor(int id);
 
     void deleteInstructorDetail(int id);
+
+    List<Course> getInstructorCourses(int id);
+
+    Instructor findInstructorByFetchJoin(int id);
+
+    void updateInstructor(Instructor instructor);
+
+    void updateCourse(Course course);
+
+    Course findCourseById(int id);
 
 }

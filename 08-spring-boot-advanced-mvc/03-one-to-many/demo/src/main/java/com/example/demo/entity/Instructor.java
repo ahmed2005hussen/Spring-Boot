@@ -28,8 +28,14 @@ public class Instructor {
     @JoinColumn(name = "instructor_detail_id")
     private InstructorDetail instructorDetail;
 
+    // مشكله ال lazy علشان نحلها عندنا 3 طرق
+    // 1- نخلي ال fetch = FetchType.Eager و ده مش احسن حاجه عموما
+    // 2- نعمل فانكشن و هي ترجع ال courses اللي related بي instructor معين و نعمله set
+    // 3- نعمل فانكشن ترجع ال instructor بال course عن طريق query fetch join
 
     @OneToMany(mappedBy="instructor" ,
+    fetch = FetchType.LAZY
+    ,
     cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH , CascadeType.MERGE})
 
     private List<Course> courses;

@@ -4,11 +4,14 @@ import com.example.demo.dao.AppDao;
 import com.example.demo.entity.Course;
 import com.example.demo.entity.Instructor;
 import com.example.demo.entity.InstructorDetail;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+
+import java.util.List;
 
 @SpringBootApplication
 public class DemoApplication {
@@ -34,10 +37,62 @@ public class DemoApplication {
 //            deleteInsturctorDetailById(appDao);
 
 
-              createInstructorWithCourse(appDao);
+//              createInstructorWithCourse(appDao);
 
+//            findInsturctorWithCourses(appDao);
+
+//            findInsturctorWithFetchJoin(appDao);
+
+//            updateInstructor(appDao);
+
+            updateCourse(appDao);
         };
 
+    }
+
+    private void updateCourse(AppDao appDao) {
+
+        int id = 10 ;
+        Course course = appDao.findCourseById(id);
+
+        course.setTitle("IntroToSpringBoot");
+
+        appDao.updateCourse(course);
+        System.out.println("DONE");
+    }
+
+    private void updateInstructor(AppDao appDao) {
+        Instructor instructor = appDao.findInstructorByFetchJoin(1);
+
+        instructor.setEmail("aaaaaaaaaaaaahmed@gmail.com");
+        appDao.updateInstructor(instructor);
+        System.out.println("DONE");
+    }
+
+    private void findInsturctorWithFetchJoin(AppDao appDao) {
+
+    int id = 1;
+
+    Instructor instructor = appDao.findInstructorByFetchJoin(id);
+
+        System.out.println(instructor);
+        System.out.println(instructor.getInstructorDetail());
+        System.out.println(instructor.getCourses());
+
+    }
+
+
+    private void findInsturctorWithCourses(AppDao appDao) {
+        int id = 1;
+        Instructor instructor = appDao.getInstructor(id);
+        System.out.println(instructor);
+
+        List<Course> courses  = appDao.getInstructorCourses(id);
+        instructor.setCourses(courses);
+
+
+        System.out.println(instructor.getCourses());
+        System.out.println("done");
     }
 
     private void createInstructorWithCourse(AppDao appDao) {
