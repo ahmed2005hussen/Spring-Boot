@@ -29,7 +29,7 @@ public class DemoApplication {
 
 //           findInstuctorById(appDao);
 
-            //deleteInstructorById(appDao);
+//            deleteInstructorById(appDao);
 
 //            findInsturctorDetailById(appDao);
 
@@ -45,14 +45,27 @@ public class DemoApplication {
 
 //            updateInstructor(appDao);
 
-            updateCourse(appDao);
+//            updateCourse(appDao);
+
+            deleteCourseById(appDao);
+
         };
+
+    }
+
+    private void deleteCourseById(AppDao appDao) {
+
+        int id = 10 ;
+
+        appDao.deleteCourseById(id);
+
+        System.out.println("Done");
 
     }
 
     private void updateCourse(AppDao appDao) {
 
-        int id = 10 ;
+        int id = 10;
         Course course = appDao.findCourseById(id);
 
         course.setTitle("IntroToSpringBoot");
@@ -71,9 +84,9 @@ public class DemoApplication {
 
     private void findInsturctorWithFetchJoin(AppDao appDao) {
 
-    int id = 1;
+        int id = 1;
 
-    Instructor instructor = appDao.findInstructorByFetchJoin(id);
+        Instructor instructor = appDao.findInstructorByFetchJoin(id);
 
         System.out.println(instructor);
         System.out.println(instructor.getInstructorDetail());
@@ -87,7 +100,7 @@ public class DemoApplication {
         Instructor instructor = appDao.getInstructor(id);
         System.out.println(instructor);
 
-        List<Course> courses  = appDao.getInstructorCourses(id);
+        List<Course> courses = appDao.getInstructorCourses(id);
         instructor.setCourses(courses);
 
 
@@ -108,22 +121,22 @@ public class DemoApplication {
         Course course2 = new Course("Java");
 
 
-        instructor.add(course );
+        instructor.add(course);
         instructor.add(course2);
 
         System.out.println("Created instructor: " + instructor);
 
         appDao.save(instructor);
 
-        System.out.println("Done " + instructor );
-        System.out.println("Done "  + instructor.getInstructorDetail());
+        System.out.println("Done " + instructor);
+        System.out.println("Done " + instructor.getInstructorDetail());
         System.out.println("Done " + instructor.getCourses());
 
     }
 
     private void deleteInsturctorDetailById(AppDao appDao) {
 
-        int id = 2;
+        int id = 1;
         appDao.deleteInstructorDetail(id);
         System.out.println("Done");
 
@@ -141,8 +154,9 @@ public class DemoApplication {
 
     private void deleteInstructorById(AppDao appDao) {
 
-        int id = 2;
+        int id = 1;
         appDao.deleteInstructor(id);
+        System.out.println("Done");
     }
 
 
