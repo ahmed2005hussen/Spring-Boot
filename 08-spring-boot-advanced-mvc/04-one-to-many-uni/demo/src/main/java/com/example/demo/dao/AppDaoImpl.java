@@ -115,10 +115,7 @@ public class AppDaoImpl implements AppDao {
     public void deleteCourseById(int id) {
 
         Course course = em.find(Course.class, id);
-
         em.remove(course);
-
-
     }
 
     @Override
@@ -127,5 +124,20 @@ public class AppDaoImpl implements AppDao {
 
         em.persist(course);
 
+    }
+
+    @Override
+    public Course findCourseAndReviewById(int id) {
+
+        TypedQuery query = em.createQuery(
+                "select i from Course i " +
+                        "join fetch i.reviews " +
+                        "where i.id = :crsId", Course.class);
+
+        query.setParameter("crsId" , id);
+
+        Course c = (Course) query.getSingleResult();
+
+        return c;
     }
 }

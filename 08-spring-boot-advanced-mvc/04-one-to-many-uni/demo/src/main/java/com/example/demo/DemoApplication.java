@@ -26,9 +26,29 @@ public class DemoApplication {
     public CommandLineRunner commandLineRunner(AppDao appDao) {
         return runner -> {
 
-            createCourseAndReviews(appDao);
+//            createCourseAndReviews(appDao);
+
+//            findCourseAndReviews(appDao);
+
+
+            deleteCourseById(appDao);
 
         };
+
+    }
+
+    private void findCourseAndReviews(AppDao appDao) {
+
+        int id = 10 ;
+
+        Course c = appDao.findCourseAndReviewById(id);
+
+        System.out.println(c);
+        System.out.println(c.getReviews());
+
+        System.out.println("Done");
+
+
 
     }
 
