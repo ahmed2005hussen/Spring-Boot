@@ -120,4 +120,12 @@ public class AppDaoImpl implements AppDao {
 
 
     }
+
+    @Override
+    @Transactional
+    public void save(Course course) {
+
+        em.persist(course);
+
+    }
 }

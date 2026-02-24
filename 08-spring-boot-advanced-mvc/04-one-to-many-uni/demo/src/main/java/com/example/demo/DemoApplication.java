@@ -4,6 +4,7 @@ import com.example.demo.dao.AppDao;
 import com.example.demo.entity.Course;
 import com.example.demo.entity.Instructor;
 import com.example.demo.entity.InstructorDetail;
+import com.example.demo.entity.Review;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -25,37 +26,31 @@ public class DemoApplication {
     public CommandLineRunner commandLineRunner(AppDao appDao) {
         return runner -> {
 
-            // createInstructor(appDao);
-
-//           findInstuctorById(appDao);
-
-//            deleteInstructorById(appDao);
-
-//            findInsturctorDetailById(appDao);
-
-
-//            deleteInsturctorDetailById(appDao);
-
-
-//              createInstructorWithCourse(appDao);
-
-//            findInsturctorWithCourses(appDao);
-
-//            findInsturctorWithFetchJoin(appDao);
-
-//            updateInstructor(appDao);
-
-//            updateCourse(appDao);
-
-            deleteCourseById(appDao);
+            createCourseAndReviews(appDao);
 
         };
 
     }
 
+    private void createCourseAndReviews(AppDao appDao) {
+
+        Course course = new Course("Spring boot");
+
+        course.addReview(new Review("Good"));
+        course.addReview(new Review("Bad"));
+        course.addReview(new Review("cool"));
+
+        appDao.save(course);
+
+
+        System.out.println("done");
+
+
+    }
+
     private void deleteCourseById(AppDao appDao) {
 
-        int id = 10 ;
+        int id = 10;
 
         appDao.deleteCourseById(id);
 
