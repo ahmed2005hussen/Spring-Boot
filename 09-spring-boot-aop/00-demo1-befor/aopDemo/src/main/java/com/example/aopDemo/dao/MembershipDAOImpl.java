@@ -11,4 +11,12 @@ public class MembershipDAOImpl implements MembershipDAO{
         System.out.println("hello i'm a Membership , " + getClass());
         return false;
     }
+
+    @Override
+    public boolean goToSleep() {
+
+        System.out.println(getClass() +  " goToSleep()");
+
+        return false;
+    }
 }
