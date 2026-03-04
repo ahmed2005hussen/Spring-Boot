@@ -26,7 +26,7 @@ public class AopDemoApplication {
 	private void addAccount(AccountDAO accountDAO , MembershipDAO membershipDAO) {
 
 
-		accountDAO.addAccount(new Account() , true);
+		accountDAO.addAccount(new Account("asdfasdf" , "jkf") , true);
 		membershipDAO.addMember();
 
 

@@ -12,21 +12,36 @@ public class MyDemoLoggingAspect {
     // create a global pointcut
 
     @Pointcut("execution( *  com.example.aopDemo.dao.*.*(..))")
-    public void pointCutGlobalPoint(){}
+    private void pointCutGlobalPoint(){}
 
-    // pointcut
+    // create pointcut for getter
+   @Pointcut("execution( * com.example.aopDemo.dao.*.get*(..))")
+   private void getter(){}
 
-    @Before("pointCutGlobalPoint()")
+    // create pointcut for setter
+    @Pointcut("execution( * com.example.aopDemo.dao.*.set*(..))")
+   private void setter(){}
 
+
+    // create pointcut include package exclude getters and setters
+    @Pointcut("pointCutGlobalPoint() && !(setter() || getter())")
+    private void combine(){}
+
+//    @Before("pointCutGlobalPoint()")
+    @Before("combine()")
     public void beforeAddAccountAdvice() {
 
         System.out.println("\n ==============>>> Executing @Before device on addAccount <<<=======================");
     }
 
-    @Before("pointCutGlobalPoint()")
-    public void ApiAnalytics() {
+//   @Before("pointCutGlobalPoint()")
+    @Before("combine()")
+   public void ApiAnalytics() {
 
-        System.out.println("\n ==============>>> API Analytics <<<=======================");
-    }
+       System.out.println("\n ==============>>> API Analytics <<<=======================");
+   }
+
+
+
 
 }
